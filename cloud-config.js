@@ -1,15 +1,14 @@
 /**
- * ============================================================================
  * ملف إعدادات الربط السحابي لمنصة يُسر (Yusur Cloud Authentication Config)
- * ============================================================================
- * مربوط بقاعدة بيانات Firebase Firestore الخاصة بمنصة يُسر (yusr-platform-912a2)
- * لحفظ ومزامنة حسابات المالك العام والمراكز والأخصائيين المشفرة سحابياً عبر جميع الأجهزة
- * مع الاحتفاظ بنسخة احتياطية محلية تلقائية (localStorage) عند انقطاع الاتصال.
- * ============================================================================
+ * مربوط بقاعدة بيانات Firebase Firestore لمشروع yusr-platform-912a2
  */
 window.YUSUR_CLOUD_CONFIG = {
-    // معرف مشروع Firebase Firestore الخاص بالمنصة
-    projectId: "yusr-platform-912a2",
-    // اسم المجموعة السحابية التي تُحفظ فيها حسابات المالك والمراكز والأخصائيين المشفرة
-    collectionName: "yusur_auth_accounts"
+  apiKey: "AIzaSyCzot108BIR0rNsPJsJOQPkXJbAKn4LX7MM",
+  authDomain: "yusr-platform-912a2.firebaseapp.com",
+  projectId: "yusr-platform-912a2",
+  storageBucket: "yusr-platform-912a2.firebasestorage.app",
+  messagingSenderId: "1067508791563",
+  appId: "1:1067508791563:web:023ee4aadc49d6ed934a0e",
+  measurementId: "G-Z9VHQMC08Q",
+  collectionName: "yusr_auth_accounts"
 };
