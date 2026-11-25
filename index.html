@@ -4571,16 +4571,39 @@
             if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
         }
 
-        function openCloudCasesModal() {
-            renderCloudCasesList();
-            const m = document.getElementById('cloud-cases-modal');
-            if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
-        }
-
+        async function openCloudCasesModal() {
+  const key = getScopedStorageKey('yusr_saved_cases_list_v1');
+  const localCases = JSON.parse(SafeStorage.getItem(key) || '[]');
+  await pullCloudCasesRegistry(key, localCases);
+  renderCloudCasesList();
+  const m = document.getElementById('cloud-cases-modal');
+  if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+}
         function closeCloudCasesModal() {
             const m = document.getElementById('cloud-cases-modal');
             if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+        }async function pushCloudCasesRegistry(cases) {
+  const cfg = window.YUSUR_CLOUD_CONFIG || {};
+  const pid = (cfg.projectId || '').trim();
+  const col = (cfg.collectionName || 'yusur_auth_accounts').trim();
+  if (!pid || pid === 'YOUR_FIREBASE_PROJECT_ID') return false;
+  const url = https://firestore.googleapis.com/v1/projects/${encodeURIComponent(pid)}/databases/(default)/documents/${encodeURIComponent(col)}/saved_cases_registry;
+  try {
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          payload: { stringValue: JSON.stringify(cases) },
+          updatedAt: { stringValue: new Date().toISOString() }
         }
+      })
+    });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+}
 
         function saveCurrentCaseToCloudRegistry() {
             const key = getScopedStorageKey('yusur_saved_cases_list_v1');
@@ -4598,9 +4621,34 @@
             if (existingIdx >= 0) cases[existingIdx] = entry;
             else cases.unshift(entry);
             SafeStorage.setItem(key, JSON.stringify(cases));
+pushCloudCasesRegistry(cases);
             renderCloudCasesList();
             showToast(`تم حفظ ملف (${childName}) في سجل المركز`);
-        }
+        }async function pullCloudCasesRegistry(key, localCases) {
+  const cfg = window.YUSUR_CLOUD_CONFIG || {};
+  const pid = (cfg.projectId || '').trim();
+  const col = (cfg.collectionName || 'yusur_auth_accounts').trim();
+  if (!pid || pid === 'YOUR_FIREBASE_PROJECT_ID') return localCases;
+  const url = https://firestore.googleapis.com/v1/projects/${encodeURIComponent(pid)}/databases/(default)/documents/${encodeURIComponent(col)}/saved_cases_registry;
+  try {
+    const res = await fetch(url, { method: 'GET' });
+    if (!res.ok) return localCases;
+    const doc = await res.json();
+    const payloadStr = doc?.fields?.payload?.stringValue;
+    if (!payloadStr) return localCases;
+    const cloudCases = JSON.parse(payloadStr);
+    if (!Array.isArray(cloudCases)) return localCases;
+    const merged = [...cloudCases];
+    for (const loc of (localCases || [])) {
+      const idx = merged.findIndex(c => (c.id && loc.id && c.id === loc.id) || (c.childName && loc.childName && c.childName === loc.childName));
+      if (idx === -1) merged.push(loc);
+    }
+    SafeStorage.setItem(key, JSON.stringify(merged));
+    return merged;
+  } catch (e) {
+    return localCases;
+  }
+}
 
         function renderCloudCasesList() {
             const listEl = document.getElementById('cloud-cases-list');
