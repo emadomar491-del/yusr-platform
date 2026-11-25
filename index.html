@@ -4582,7 +4582,7 @@
         function closeCloudCasesModal() {
             const m = document.getElementById('cloud-cases-modal');
             if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
-        }async function pushCloudCasesRegistry(cases) {
+        async function pushCloudCasesRegistry(cases) {
   const cfg = window.YUSUR_CLOUD_CONFIG || {};
   const pid = (cfg.projectId || '').trim();
   const col = (cfg.collectionName || 'yusur_auth_accounts').trim();
